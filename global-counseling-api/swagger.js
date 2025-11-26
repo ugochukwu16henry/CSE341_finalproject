@@ -1,0 +1,27 @@
+const swaggerJSDoc = require('swagger-jsdoc');
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Global Counseling API',
+      version: '1.0.0',
+      description: 'Backend API for mental health and family wellness platform',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000',
+        description: 'Development server',
+      },
+      {
+        url: 'https://your-render-url.onrender.com',
+        description: 'Production server',
+      }
+    ],
+  },
+  apis: ['./src/routes/*.js'], // paths to files with JSDoc comments
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+
+module.exports = swaggerSpec;
