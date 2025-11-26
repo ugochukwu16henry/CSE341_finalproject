@@ -14,7 +14,7 @@ const options = {
         description: 'Development server',
       },
       {
-        url: 'https://your-render-url.onrender.com',
+        url: 'https://global-counseling-api.onrender.com',
         description: 'Production server',
       }
     ],
