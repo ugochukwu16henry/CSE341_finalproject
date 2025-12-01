@@ -4,21 +4,33 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("../swagger");
+const passport = require("./config/passport");
 
 const userRoutes = require("./routes/user.routes");
 const therapistRoutes = require("./routes/therapist.routes");
+const authRoutes = require("./routes/auth.routes");
+const appointmentRoutes = require("./routes/appointment.routes");
+const wellnessRoutes = require("./routes/wellness.routes");
 
 const app = express();
 
+// Passport middleware (for OAuth only, no sessions)
+app.use(passport.initialize());
+
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "*",
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 
 // Routes
+app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/therapists", therapistRoutes);
+app.use("/appointments", appointmentRoutes);
+app.use("/wellness", wellnessRoutes);
 
 // Swagger docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

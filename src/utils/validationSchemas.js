@@ -29,4 +29,19 @@ const therapistSchema = Joi.object({
   }).required(),
 });
 
-module.exports = { userSchema, therapistSchema };
+const appointmentSchema = Joi.object({
+  userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+  therapistId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+  date: Joi.date().iso().required(),
+  time: Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/).required(),
+  status: Joi.string().valid("pending", "confirmed", "completed", "cancelled"),
+  notes: Joi.string().allow(""),
+});
+
+const wellnessSchema = Joi.object({
+  mood: Joi.string().min(2).required(),
+  stressLevel: Joi.number().integer().min(1).max(10).required(),
+  note: Joi.string().allow(""),
+});
+
+module.exports = { userSchema, therapistSchema, appointmentSchema, wellnessSchema };

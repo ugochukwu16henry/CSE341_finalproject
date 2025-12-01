@@ -8,6 +8,16 @@ const options = {
       version: "1.0.0",
       description: "Backend API for mental health and family wellness platform",
     },
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }],
     servers: [
       {
         url: "http://localhost:5000",
