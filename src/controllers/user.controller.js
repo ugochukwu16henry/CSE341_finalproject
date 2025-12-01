@@ -11,6 +11,10 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
     const user = await User.findById(req.params.id).select("-__v");
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(200).json(user);
@@ -36,6 +40,10 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -43,12 +51,19 @@ exports.updateUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(200).json(user);
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Email or Google ID already exists" });
+    }
     res.status(400).json({ error: err.message });
   }
 };
 
 exports.deleteUser = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.status(204).send();

@@ -11,6 +11,10 @@ exports.getAllTherapists = async (req, res) => {
 
 exports.getTherapistById = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid therapist ID format" });
+    }
     const therapist = await Therapist.findById(req.params.id).select("-__v");
     if (!therapist)
       return res.status(404).json({ error: "Therapist not found" });
@@ -32,6 +36,10 @@ exports.createTherapist = async (req, res) => {
 
 exports.updateTherapist = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid therapist ID format" });
+    }
     const therapist = await Therapist.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -47,6 +55,10 @@ exports.updateTherapist = async (req, res) => {
 
 exports.deleteTherapist = async (req, res) => {
   try {
+    // Check if ID is valid ObjectId
+    if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid therapist ID format" });
+    }
     const therapist = await Therapist.findByIdAndDelete(req.params.id);
     if (!therapist)
       return res.status(404).json({ error: "Therapist not found" });

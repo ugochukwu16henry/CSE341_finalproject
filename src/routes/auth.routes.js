@@ -53,7 +53,7 @@ router.get(
     if (!process.env.JWT_SECRET) {
       return res.status(500).json({ error: "JWT_SECRET is not configured." });
     }
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: req.user.id || req.user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     // For demo/video: redirect to simple page with token

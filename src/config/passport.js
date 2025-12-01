@@ -14,7 +14,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.BASE_URL || "https://your-app.onrender.com"}/auth/google/callback`,
+        callbackURL: `${
+          process.env.BASE_URL ||
+          "https://cse341-finalproject-pow9.onrender.com"
+        }/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

@@ -30,7 +30,7 @@ const therapistSchema = Joi.object({
 });
 
 const appointmentSchema = Joi.object({
-  userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
+  userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/), // Optional - set from auth token
   therapistId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
   date: Joi.date().iso().required(),
   time: Joi.string().pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/).required(),
