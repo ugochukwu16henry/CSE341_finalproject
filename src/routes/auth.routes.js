@@ -23,9 +23,22 @@ router.get(
         error: "Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables." 
       });
     }
+    
+    // Verify that the Google strategy is registered
+    const strategy = passport._strategies.google;
+    if (!strategy) {
+      return res.status(503).json({ 
+        error: "Google OAuth strategy not initialized. Check your environment variables." 
+      });
+    }
+    
     next();
   },
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", { 
+    scope: ["profile", "email"],
+    accessType: "offline",
+    prompt: "consent"
+  })
 );
 
 /**
