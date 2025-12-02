@@ -54,6 +54,26 @@ router.get("/user/:userId", ctrl.getByUser);
 
 /**
  * @swagger
+ * /wellness/{id}:
+ *   get:
+ *     summary: Get wellness entry by ID
+ *     tags: [Wellness]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Wellness entry found
+ *       404:
+ *         description: Wellness entry not found
+ */
+router.get("/:id", ctrl.getById);
+
+
+/**
+ * @swagger
  * /wellness:
  *   post:
  *     summary: Create a new wellness entry

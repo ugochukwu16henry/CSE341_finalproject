@@ -10,6 +10,20 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.getById = async (req, res) => {
+  try {
+    // Check if ID is valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid appointment ID format" });
+    }
+    const app = await Appointment.findById(req.params.id).populate("userId therapistId", "name email");
+    if (!app) return res.status(404).json({ error: "Appointment not found" });
+    res.json(app);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getByUser = async (req, res) => {
   try {
     // Check if userId is valid ObjectId

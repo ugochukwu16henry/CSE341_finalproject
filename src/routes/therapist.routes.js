@@ -54,22 +54,101 @@ const { therapistSchema } = require("../utils/validationSchemas");
  *       200:
  *         description: List of therapists
  */
+/**
+ * @swagger
+ * /therapists:
+ *   get:
+ *     summary: Get all therapists
+ *     tags: [Therapists]
+ *     responses:
+ *       200:
+ *         description: List of therapists
+ */
 router.get("/", therapistController.getAllTherapists);
 
+/**
+ * @swagger
+ * /therapists/{id}:
+ *   get:
+ *     summary: Get therapist by ID
+ *     tags: [Therapists]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Therapist found
+ *       404:
+ *         description: Therapist not found
+ */
 router.get("/:id", therapistController.getTherapistById);
 
+/**
+ * @swagger
+ * /therapists:
+ *   post:
+ *     summary: Create a new therapist
+ *     tags: [Therapists]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Therapist'
+ *     responses:
+ *       201:
+ *         description: Therapist created
+ */
 router.post(
   "/",
   validate(therapistSchema),
   therapistController.createTherapist
 );
 
+/**
+ * @swagger
+ * /therapists/{id}:
+ *   put:
+ *     summary: Update a therapist
+ *     tags: [Therapists]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Therapist'
+ *     responses:
+ *       200:
+ *         description: Therapist updated
+ */
 router.put(
   "/:id",
   validate(therapistSchema),
   therapistController.updateTherapist
 );
 
+/**
+ * @swagger
+ * /therapists/{id}:
+ *   delete:
+ *     summary: Delete a therapist
+ *     tags: [Therapists]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: Therapist deleted
+ */
 router.delete("/:id", therapistController.deleteTherapist);
 
 module.exports = router;

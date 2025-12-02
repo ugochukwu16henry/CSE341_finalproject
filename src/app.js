@@ -11,6 +11,7 @@ const therapistRoutes = require("./routes/therapist.routes");
 const authRoutes = require("./routes/auth.routes");
 const appointmentRoutes = require("./routes/appointment.routes");
 const wellnessRoutes = require("./routes/wellness.routes");
+const externalRoutes = require("./routes/external.routes");
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/users", userRoutes);
 app.use("/therapists", therapistRoutes);
 app.use("/appointments", appointmentRoutes);
 app.use("/wellness", wellnessRoutes);
+app.use("/", externalRoutes); // External API routes (quotes, books)
 
 // Swagger docs
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

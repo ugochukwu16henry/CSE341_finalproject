@@ -97,6 +97,23 @@ router.get(
  *       500:
  *         description: JWT_SECRET not configured
  */
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout user (JWT-based - client should discard token)
+ *     tags: [Authentication]
+ *     description: Since we use JWT tokens, logout is handled client-side by discarding the token. This endpoint provides a confirmation message.
+ *     responses:
+ *       200:
+ *         description: Logout successful (client should discard token)
+ */
+router.post("/logout", (req, res) => {
+  res.status(200).json({
+    message: "Logout successful. Please discard your JWT token on the client side.",
+  });
+});
+
 router.post("/test-token", async (req, res) => {
   try {
     if (!process.env.JWT_SECRET) {

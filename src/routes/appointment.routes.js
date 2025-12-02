@@ -57,6 +57,26 @@ router.get("/user/:userId", ctrl.getByUser);
 
 /**
  * @swagger
+ * /appointments/{id}:
+ *   get:
+ *     summary: Get appointment by ID
+ *     tags: [Appointments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Appointment found
+ *       404:
+ *         description: Appointment not found
+ */
+router.get("/:id", ctrl.getById);
+
+
+/**
+ * @swagger
  * /appointments:
  *   post:
  *     summary: Create a new appointment

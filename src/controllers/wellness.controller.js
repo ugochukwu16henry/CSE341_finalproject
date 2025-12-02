@@ -10,6 +10,20 @@ exports.getAll = async (req, res) => {
   }
 };
 
+exports.getById = async (req, res) => {
+  try {
+    // Check if ID is valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid wellness entry ID format" });
+    }
+    const wellness = await Wellness.findById(req.params.id).populate("userId", "name email");
+    if (!wellness) return res.status(404).json({ error: "Wellness entry not found" });
+    res.json(wellness);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getByUser = async (req, res) => {
   try {
     // Check if userId is valid ObjectId
