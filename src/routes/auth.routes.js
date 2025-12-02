@@ -61,21 +61,42 @@ router.get(
     }
     next();
   },
-  passport.authenticate("google", { session: false }),
-  (req, res) => {
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ error: "JWT_SECRET is not configured." });
+  passport.authenticate("google", { 
+    session: false,
+    failureRedirect: "/auth/failure",
+    failureFlash: false
+  }),
+  (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Authentication failed. User not found." });
+      }
+
+      if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ error: "JWT_SECRET is not configured." });
+      }
+
+      const userId = req.user._id || req.user.id;
+      if (!userId) {
+        return res.status(500).json({ error: "User ID not found." });
+      }
+
+      const token = jwt.sign({ id: userId.toString() }, process.env.JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      // For demo/video: redirect to simple page with token
+      res.send(`
+        <h2>Login Successful!</h2>
+        <p>Copy this JWT token for testing protected routes:</p>
+        <textarea style="width:100%;height:100px">${token}</textarea>
+        <script>navigator.clipboard.writeText("${token}")</script>
+        <p><strong>User:</strong> ${req.user.name} (${req.user.email})</p>
+      `);
+    } catch (err) {
+      console.error("Callback error:", err);
+      next(err);
     }
-    const token = jwt.sign({ id: req.user.id || req.user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    // For demo/video: redirect to simple page with token
-    res.send(`
-      <h2>Login Successful!</h2>
-      <p>Copy this JWT token for testing protected routes:</p>
-      <textarea style="width:100%;height:100px">${token}</textarea>
-      <script>navigator.clipboard.writeText("${token}")</script>
-    `);
   }
 );
 
@@ -121,6 +142,23 @@ router.get(
  *       200:
  *         description: Logout successful (client should discard token)
  */
+/**
+ * @swagger
+ * /auth/failure:
+ *   get:
+ *     summary: OAuth authentication failure page
+ *     tags: [Authentication]
+ *     responses:
+ *       401:
+ *         description: Authentication failed
+ */
+router.get("/failure", (req, res) => {
+  res.status(401).json({ 
+    error: "Authentication failed",
+    message: "Unable to authenticate with Google. Please try again."
+  });
+});
+
 router.post("/logout", (req, res) => {
   res.status(200).json({
     message: "Logout successful. Please discard your JWT token on the client side.",

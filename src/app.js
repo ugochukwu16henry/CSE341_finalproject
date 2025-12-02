@@ -20,9 +20,11 @@ app.use(passport.initialize());
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "*",
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "*",
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 
@@ -50,8 +52,19 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Something went wrong!" });
+  console.error("Error:", err.message);
+  console.error("Stack:", err.stack);
+
+  // Don't expose internal errors in production
+  const errorMessage =
+    process.env.NODE_ENV === "production"
+      ? "Something went wrong!"
+      : err.message;
+
+  res.status(err.status || 500).json({
+    error: errorMessage,
+    ...(process.env.NODE_ENV !== "production" && { details: err.stack }),
+  });
 });
 
 module.exports = app;
