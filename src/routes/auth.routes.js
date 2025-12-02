@@ -61,11 +61,31 @@ router.get(
     }
     next();
   },
-  passport.authenticate("google", { 
-    session: false,
-    failureRedirect: "/auth/failure",
-    failureFlash: false
-  }),
+  (req, res, next) => {
+    passport.authenticate("google", { 
+      session: false,
+      failureRedirect: false,
+    }, (err, user, info) => {
+      if (err) {
+        console.error("❌ Passport authentication error:", err.message);
+        console.error("Error details:", err);
+        return res.status(401).json({ 
+          error: "Authentication failed",
+          message: err.message,
+          details: process.env.NODE_ENV !== "production" ? err.stack : undefined
+        });
+      }
+      if (!user) {
+        console.error("❌ No user returned from authentication");
+        return res.status(401).json({ 
+          error: "Authentication failed",
+          message: "User not found or could not be created"
+        });
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   (req, res, next) => {
     try {
       if (!req.user) {

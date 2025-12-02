@@ -14,7 +14,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     "https://cse341-finalproject-pow9.onrender.com"
   }/auth/google/callback`;
   
-  console.log("🔐 Google OAuth Callback URL:", callbackURL);
+  console.log("🔐 Google OAuth Configuration:");
+  console.log("   Callback URL:", callbackURL);
+  console.log("   Client ID:", process.env.GOOGLE_CLIENT_ID?.substring(0, 20) + "...");
+  console.log("   Client Secret:", process.env.GOOGLE_CLIENT_SECRET ? "✅ Set" : "❌ Missing");
   console.log("📝 Make sure this exact URL is added to Google Cloud Console > Authorized redirect URIs");
   
   passport.use(
@@ -24,6 +27,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         callbackURL: callbackURL,
+        passReqToCallback: false,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
