@@ -9,15 +9,20 @@ const User = require("../models/user.model");
 
 // Only initialize Google Strategy if credentials are provided
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  const callbackURL = `${
+    process.env.BASE_URL ||
+    "https://cse341-finalproject-pow9.onrender.com"
+  }/auth/google/callback`;
+  
+  console.log("🔐 Google OAuth Callback URL:", callbackURL);
+  console.log("📝 Make sure this exact URL is added to Google Cloud Console > Authorized redirect URIs");
+  
   passport.use(
     new GoogleStrategy(
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${
-          process.env.BASE_URL ||
-          "https://cse341-finalproject-pow9.onrender.com"
-        }/auth/google/callback`,
+        callbackURL: callbackURL,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
