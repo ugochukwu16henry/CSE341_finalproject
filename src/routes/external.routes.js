@@ -22,7 +22,7 @@ router.get("/quotes/random", async (req, res) => {
       author: response.data.quote.author,
       source: "FavQs",
     };
-    res.json(quote);
+    res.status(200).json(quote);
   } catch (err) {
     res.status(500).json({
       error: "Failed to fetch quote from external API",
@@ -76,8 +76,8 @@ router.get("/books/search", async (req, res) => {
       previewLink: item.volumeInfo.previewLink,
     })) || [];
 
-    res.json({
-      totalItems: response.data.totalItems,
+    res.status(200).json({
+      totalItems: response.data.totalItems || 0,
       books: books,
     });
   } catch (err) {

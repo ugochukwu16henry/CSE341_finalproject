@@ -30,6 +30,12 @@ exports.createTherapist = async (req, res) => {
     await therapist.save();
     res.status(201).json(therapist);
   } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ 
+        error: "Validation Error",
+        details: Object.values(err.errors).map(e => e.message)
+      });
+    }
     res.status(400).json({ error: err.message });
   }
 };
@@ -49,6 +55,12 @@ exports.updateTherapist = async (req, res) => {
       return res.status(404).json({ error: "Therapist not found" });
     res.status(200).json(therapist);
   } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ 
+        error: "Validation Error",
+        details: Object.values(err.errors).map(e => e.message)
+      });
+    }
     res.status(400).json({ error: err.message });
   }
 };

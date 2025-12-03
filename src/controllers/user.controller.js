@@ -34,6 +34,12 @@ exports.createUser = async (req, res) => {
         .status(400)
         .json({ error: "Email or Google ID already exists" });
     }
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ 
+        error: "Validation Error",
+        details: Object.values(err.errors).map(e => e.message)
+      });
+    }
     res.status(400).json({ error: err.message });
   }
 };
@@ -53,6 +59,12 @@ exports.updateUser = async (req, res) => {
   } catch (err) {
     if (err.code === 11000) {
       return res.status(400).json({ error: "Email or Google ID already exists" });
+    }
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ 
+        error: "Validation Error",
+        details: Object.values(err.errors).map(e => e.message)
+      });
     }
     res.status(400).json({ error: err.message });
   }

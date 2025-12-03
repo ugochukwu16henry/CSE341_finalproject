@@ -54,16 +54,6 @@ const { therapistSchema } = require("../utils/validationSchemas");
  *       200:
  *         description: List of therapists
  */
-/**
- * @swagger
- * /therapists:
- *   get:
- *     summary: Get all therapists
- *     tags: [Therapists]
- *     responses:
- *       200:
- *         description: List of therapists
- */
 router.get("/", therapistController.getAllTherapists);
 
 /**
