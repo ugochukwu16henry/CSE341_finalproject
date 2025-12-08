@@ -1,9 +1,11 @@
+// jest.config.js
 module.exports = {
-  testEnvironment: "node",
-  coveragePathIgnorePatterns: ["/node_modules/", "/tests/"],
-  testMatch: ["**/tests/**/*.test.js"],
-  setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
-  verbose: true,
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   testTimeout: 30000,
+  collectCoverageFrom: [
+    'src/**/*.js',
+    '!src/**/*.test.js',
+  ],
 };
 

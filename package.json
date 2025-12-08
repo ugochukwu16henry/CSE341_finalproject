@@ -1,41 +1,29 @@
 {
-  "name": "global-counseling-api",
+  "name": "cse341-finalproject",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test": "jest --testTimeout=30000",
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "axios": "^1.13.2",
-    "bcryptjs": "^3.0.3",
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "express-session": "^1.18.2",
-    "helmet": "^8.1.0",
-    "joi": "^18.0.2",
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^9.0.0",
-    "morgan": "^1.10.1",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
+    "joi": "^17.10.2",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
-    "yamljs": "^0.3.0"
+    "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
-    "jest": "^30.2.0",
-    "mongodb-memory-server-core": "^10.3.0",
-    "nodemon": "^3.1.11",
-    "supertest": "^7.1.4"
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "mongodb-memory-server": "^10.4.1"
   }
 }

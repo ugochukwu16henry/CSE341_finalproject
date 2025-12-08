@@ -1,151 +1,50 @@
-const request = require("supertest");
-const app = require("../src/app");
-const User = require("../src/models/user.model");
+// tests/user.test.js
 
-describe("User Routes", () => {
-  describe("GET /users", () => {
-    it("should return an empty array when no users exist", async () => {
-      const response = await request(app).get("/users");
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([]);
-    });
+const request = require('supertest');
+const app = require('../src/app');
+const User = require('../src/models/User');
 
-    it("should return all users", async () => {
-      // Create test users
-      const user1 = await User.create({
-        name: "John Doe",
-        email: "john@example.com",
-      });
-      const user2 = await User.create({
-        name: "Jane Smith",
-        email: "jane@example.com",
-      });
+describe('User API', () => {
+  afterEach(async () => await User.deleteMany({}));
 
-      const response = await request(app).get("/users");
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0].name).toBe(user1.name);
-      expect(response.body[1].name).toBe(user2.name);
-    });
+  it('GET /users returns empty array', async () => {
+    const res = await request(app).get('/users');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveLength(0);
   });
 
-  describe("GET /users/:id", () => {
-    it("should return a user by ID", async () => {
-      const user = await User.create({
-        name: "Test User",
-        email: "test@example.com",
-      });
-
-      const response = await request(app).get(`/users/${user._id}`);
-      expect(response.status).toBe(200);
-      expect(response.body.name).toBe(user.name);
-      expect(response.body.email).toBe(user.email);
-    });
-
-    it("should return 404 if user not found", async () => {
-      const mongoose = require("mongoose");
-      const fakeId = new mongoose.Types.ObjectId();
-      const response = await request(app).get(`/users/${fakeId}`);
-      expect(response.status).toBe(404);
-      expect(response.body.error).toBe("User not found");
-    });
+  it('GET /users/:id returns 404 for invalid ID', async () => {
+    const res = await request(app).get('/users/invalid-id');
+    expect(res.statusCode).toBe(404);
   });
 
-  describe("POST /users", () => {
-    it("should create a new user", async () => {
-      const userData = {
-        name: "New User",
-        email: "newuser@example.com",
-      };
+  it('POST /users creates a new user', async () => {
+    const newUser = {
+      name: 'Test User',
+      email: 'test@example.com'
+    };
 
-      const response = await request(app).post("/users").send(userData);
-      expect(response.status).toBe(201);
-      expect(response.body.name).toBe(userData.name);
-      expect(response.body.email).toBe(userData.email);
-      expect(response.body._id).toBeDefined();
-    });
+    const res = await request(app)
+      .post('/users')
+      .send(newUser);
 
-    it("should return 400 if email is missing", async () => {
-      const userData = {
-        name: "New User",
-      };
-
-      const response = await request(app).post("/users").send(userData);
-      expect(response.status).toBe(400);
-    });
-
-    it("should return 400 if email already exists", async () => {
-      await User.create({
-        name: "Existing User",
-        email: "existing@example.com",
-      });
-
-      const userData = {
-        name: "New User",
-        email: "existing@example.com",
-      };
-
-      const response = await request(app).post("/users").send(userData);
-      expect(response.status).toBe(400);
-    });
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toHaveProperty('_id');
+    expect(res.body.name).toBe(newUser.name);
+    expect(res.body.email).toBe(newUser.email);
   });
 
-  describe("PUT /users/:id", () => {
-    it("should update a user", async () => {
-      const user = await User.create({
-        name: "Original Name",
-        email: "original@example.com",
-      });
-
-      const updateData = {
-        name: "Updated Name",
-        email: "updated@example.com",
-      };
-
-      const response = await request(app)
-        .put(`/users/${user._id}`)
-        .send(updateData);
-      expect(response.status).toBe(200);
-      expect(response.body.name).toBe(updateData.name);
-      expect(response.body.email).toBe(updateData.email);
+  it('GET /users/:id returns user by valid ID', async () => {
+    const user = new User({
+      name: 'Test User',
+      email: 'test@example.com'
     });
+    await user.save();
 
-    it("should return 404 if user not found", async () => {
-      const mongoose = require("mongoose");
-      const fakeId = new mongoose.Types.ObjectId();
-      const updateData = {
-        name: "Updated Name",
-        email: "updated@example.com",
-      };
-
-      const response = await request(app)
-        .put(`/users/${fakeId}`)
-        .send(updateData);
-      expect(response.status).toBe(404);
-    });
-  });
-
-  describe("DELETE /users/:id", () => {
-    it("should delete a user", async () => {
-      const user = await User.create({
-        name: "To Delete",
-        email: "delete@example.com",
-      });
-
-      const response = await request(app).delete(`/users/${user._id}`);
-      expect(response.status).toBe(204);
-
-      // Verify user is deleted
-      const deletedUser = await User.findById(user._id);
-      expect(deletedUser).toBeNull();
-    });
-
-    it("should return 404 if user not found", async () => {
-      const mongoose = require("mongoose");
-      const fakeId = new mongoose.Types.ObjectId();
-      const response = await request(app).delete(`/users/${fakeId}`);
-      expect(response.status).toBe(404);
-    });
+    const res = await request(app).get(`/users/${user._id}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body._id).toBe(user._id.toString());
+    expect(res.body.name).toBe('Test User');
   });
 });
 

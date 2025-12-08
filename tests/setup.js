@@ -1,43 +1,29 @@
-const { MongoMemoryServer } = require("mongodb-memory-server-core");
-const mongoose = require("mongoose");
+// tests/setup.js
 
-// Set up environment variables for tests
-process.env.JWT_SECRET = "test-jwt-secret-key";
-process.env.GOOGLE_CLIENT_ID = "test-google-client-id";
-process.env.GOOGLE_CLIENT_SECRET = "test-google-client-secret";
-process.env.BASE_URL = "http://localhost:5000";
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
-// Setup before all tests
 beforeAll(async () => {
-  jest.setTimeout(30000); // Increase timeout for MongoDB Memory Server
   mongoServer = await MongoMemoryServer.create({
     instance: {
-      dbName: "jest-test-db",
+      dbName: 'jest-test',
     },
   });
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
-}, 30000);
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+}, 60000); // 60 second timeout for setup (to allow MongoDB download on first run)
 
-// Cleanup after each test
-afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    const collection = collections[key];
-    await collection.deleteMany({});
-  }
-});
-
-// Teardown after all tests
 afterAll(async () => {
   if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
+    await mongoose.disconnect();
   }
   if (mongoServer) {
     await mongoServer.stop();
   }
-}, 30000);
+});
 

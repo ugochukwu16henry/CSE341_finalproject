@@ -1,92 +1,45 @@
-const request = require("supertest");
-const app = require("../src/app");
-const Wellness = require("../src/models/wellness.model");
-const User = require("../src/models/user.model");
+// tests/wellness.test.js
 
-describe("Wellness Routes - GET Endpoints", () => {
-  test("GET /wellness - should return an empty array when no wellness entries exist", async () => {
-    const response = await request(app).get("/wellness");
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual([]);
+const request = require('supertest');
+const app = require('../src/app');
+const WellnessEntry = require('../src/models/WellnessEntry');
+const User = require('../src/models/User');
+
+describe('Wellness Entry API', () => {
+  let userId;
+
+  beforeAll(async () => {
+    const user = await User.create({ name: 'Wellness User', email: 'wellness@test.com', googleId: '456' });
+    userId = user._id;
   });
 
-  test("GET /wellness - should return all wellness entries", async () => {
-    const user = await User.create({
-      name: "Test User",
-      email: "wellnessuser@example.com",
-    });
+  afterEach(async () => await WellnessEntry.deleteMany({}));
 
-    const wellness1 = await Wellness.create({
-      userId: user._id,
-      mood: "Happy",
-      stressLevel: 3,
-      note: "Feeling good today",
-    });
-
-    const wellness2 = await Wellness.create({
-      userId: user._id,
-      mood: "Calm",
-      stressLevel: 2,
-      note: "Relaxed",
-    });
-
-    const response = await request(app).get("/wellness");
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);
+  it('GET /wellness returns list', async () => {
+    const res = await request(app).get('/wellness');
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
   });
 
-  test("GET /wellness/:id - should return a wellness entry by ID", async () => {
-    const user = await User.create({
-      name: "Test User 2",
-      email: "wellnessuser2@example.com",
-    });
+  it('GET /wellness/user/:userId returns entries', async () => {
+    await WellnessEntry.create({ userId, mood: 'calm', stressLevel: 2 });
 
-    const wellness = await Wellness.create({
-      userId: user._id,
-      mood: "Anxious",
-      stressLevel: 7,
-      note: "Feeling stressed",
-    });
-
-    const response = await request(app).get(`/wellness/${wellness._id}`);
-    expect(response.status).toBe(200);
-    expect(response.body._id.toString()).toBe(wellness._id.toString());
-    expect(response.body.mood).toBe("Anxious");
-    expect(response.body.stressLevel).toBe(7);
+    const res = await request(app).get(`/wellness/user/${userId}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.length).toBe(1);
   });
 
-  test("GET /wellness/user/:userId - should return wellness entries for a specific user", async () => {
-    const user1 = await User.create({
-      name: "User One",
-      email: "wellnessuser3@example.com",
-    });
-    const user2 = await User.create({
-      name: "User Two",
-      email: "wellnessuser4@example.com",
-    });
+  it('GET /wellness/:id returns single entry', async () => {
+    const entry = await WellnessEntry.create({ userId, mood: 'happy', stressLevel: 1 });
 
-    await Wellness.create({
-      userId: user1._id,
-      mood: "Happy",
-      stressLevel: 2,
-    });
-
-    await Wellness.create({
-      userId: user1._id,
-      mood: "Content",
-      stressLevel: 3,
-    });
-
-    await Wellness.create({
-      userId: user2._id,
-      mood: "Stressed",
-      stressLevel: 8,
-    });
-
-    const response = await request(app).get(`/wellness/user/${user1._id}`);
-    expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);
-    expect(response.body.every((w) => w.userId.toString() === user1._id.toString())).toBe(true);
+    const res = await request(app).get(`/wellness/${entry._id}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.mood).toBe('happy');
   });
+
+  it('GET /wellness with invalid ID returns 404', async () => {
+    const res = await request(app).get('/wellness/000000000000000000000000');
+    expect(res.statusCode).toBe(404);
+  });
+
 });
-

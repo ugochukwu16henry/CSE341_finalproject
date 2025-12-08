@@ -1,70 +1,95 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const morgan = require("morgan");
-const swaggerUi = require("swagger-ui-express");
-const swaggerSpec = require("../swagger");
-const passport = require("./config/passport");
+// src/app.js
 
-const userRoutes = require("./routes/user.routes");
-const therapistRoutes = require("./routes/therapist.routes");
-const authRoutes = require("./routes/auth.routes");
-const appointmentRoutes = require("./routes/appointment.routes");
-const wellnessRoutes = require("./routes/wellness.routes");
-const externalRoutes = require("./routes/external.routes");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const dotenv = require('dotenv');
+const path = require('path');
 
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+
+// Initialize Express app
 const app = express();
 
-// Passport middleware (for OAuth only, no sessions)
-app.use(passport.initialize());
-
-// Middleware
+// Security & Middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "*",
-  })
-);
-app.use(morgan("dev"));
-app.use(express.json());
+app.use(cors({
+  origin: process.env.BASE_URL || 'http://localhost:5000',
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Database connection (skip in test mode - tests use MongoDB Memory Server)
+if (process.env.NODE_ENV !== 'test') {
+  const connectDB = require('./config/db');
+  connectDB();
+}
 
 // Routes
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/therapists", therapistRoutes);
-app.use("/appointments", appointmentRoutes);
-app.use("/wellness", wellnessRoutes);
-app.use("/", externalRoutes); // External API routes (quotes, books)
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const therapistRoutes = require('./routes/therapistRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const wellnessRoutes = require('./routes/wellnessRoutes');
 
-// Swagger docs
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// API Routes
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/therapists', therapistRoutes);
+app.use('/appointments', appointmentRoutes);
+app.use('/wellness', wellnessRoutes);
 
-app.get("/", (req, res) => {
-  res.send(
-    `<h1>Global Counseling API</h1><a href="/api-docs">View API Documentation</a>`
-  );
+// Swagger setup
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Global Counseling API',
+      version: '1.0.0',
+      description: 'Backend API for mental health and family wellness platform',
+    },
+    servers: [
+      {
+        url: process.env.BASE_URL || 'http://localhost:5000',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [{ bearerAuth: [] }], // Optional: apply globally; we'll override per route
+  },
+  apis: ['./src/routes/*.js', './src/models/*.js'], // Adjust if you add JSDoc
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Health check
+app.get('/', (req, res) => {
+  res.json({ message: 'Global Counseling API is running!' });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
-
-// Global error handler
+// Global error handler (basic)
 app.use((err, req, res, next) => {
-  console.error("Error:", err.message);
-  console.error("Stack:", err.stack);
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
 
-  // Don't expose internal errors in production
-  const errorMessage =
-    process.env.NODE_ENV === "production"
-      ? "Something went wrong!"
-      : err.message;
-
-  res.status(err.status || 500).json({
-    error: errorMessage,
-    ...(process.env.NODE_ENV !== "production" && { details: err.stack }),
-  });
+// Handle 404
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
 module.exports = app;
