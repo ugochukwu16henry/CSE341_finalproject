@@ -31,18 +31,32 @@ const jwt = require('jsonwebtoken');
 // Google OAuth initiation
 router.get(
   '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  })
+  (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(503).json({
+        error: 'Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your environment variables.',
+      });
+    }
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+    })(req, res, next);
+  }
 );
 
 // Google OAuth callback
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/auth/failure',
-    session: false, // We're using JWT, not sessions
-  }),
+  (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(503).json({
+        error: 'Google OAuth is not configured.',
+      });
+    }
+    passport.authenticate('google', {
+      failureRedirect: '/auth/failure',
+      session: false, // We're using JWT, not sessions
+    })(req, res, next);
+  },
   (req, res) => {
     try {
       // Generate JWT token

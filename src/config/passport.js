@@ -2,16 +2,25 @@
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const dotenv = require('dotenv');
+const path = require('path');
 const User = require('../models/User');
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || 
-        `${process.env.BASE_URL || 'http://localhost:5000'}/auth/google/callback`,
-    },
+// Load environment variables if not already loaded
+if (!process.env.GOOGLE_CLIENT_ID) {
+  dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env') });
+}
+
+// Only configure Google OAuth if credentials are available
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || 
+          `${process.env.BASE_URL || 'http://localhost:5000'}/auth/google/callback`,
+      },
     async (accessToken, refreshToken, profile, done) => {
       try {
         // Check if user exists
@@ -45,7 +54,11 @@ passport.use(
       }
     }
   )
-);
+  );
+} else {
+  console.warn('WARNING: Google OAuth credentials not found. OAuth authentication will not work.');
+  console.warn('Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file.');
+}
 
 // Serialize user for session
 passport.serializeUser((user, done) => {

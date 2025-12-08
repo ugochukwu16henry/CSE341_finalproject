@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const { MongoStore } = require('connect-mongo');
 const passport = require('./config/passport');
 
 // Load environment variables
@@ -39,10 +39,15 @@ const sessionConfig = {
 
 // Use MongoDB store if MONGODB_URI is available, otherwise use MemoryStore (development only)
 if (process.env.MONGODB_URI && process.env.NODE_ENV !== 'test') {
-  sessionConfig.store = MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    ttl: 24 * 60 * 60, // 24 hours in seconds
-  });
+  try {
+    sessionConfig.store = MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 24 * 60 * 60, // 24 hours in seconds
+    });
+  } catch (error) {
+    console.warn('Warning: Could not create MongoStore:', error.message);
+    console.warn('Falling back to MemoryStore');
+  }
 } else if (process.env.NODE_ENV === 'production') {
   console.warn('WARNING: Using MemoryStore in production. Set MONGODB_URI for persistent sessions.');
 }
